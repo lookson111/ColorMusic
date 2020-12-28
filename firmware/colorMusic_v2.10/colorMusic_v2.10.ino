@@ -19,7 +19,7 @@
 // ***************************** НАСТРОЙКИ *****************************
 
 // ----- настройка ИК пульта
-#define REMOTE_TYPE 1       // 0 - без пульта, 1 - пульт от WAVGAT, 2 - пульт от KEYES, 3 - кастомный пульт
+#define REMOTE_TYPE 4       // 0 - без пульта, 1 - пульт от WAVGAT, 2 - пульт от KEYES, 3 - кастомный пульт 4 - блутуз
 // система может работать С ЛЮБЫМ ИК ПУЛЬТОМ (практически). Коды для своего пульта можно задать начиная со строки 160 в прошивке. Коды пультов определяются скетчем IRtest_2.0, читай инструкцию
 
 // ----- настройки параметров
@@ -51,6 +51,9 @@ byte BRIGHTNESS = 200;      // яркость по умолчанию (0 - 255)
 
 #define POT_GND A0              // пин земля для потенциометра
 #define IR_PIN 2                // пин ИК приёмника
+
+int  LED_WORK = A1;      // LED индикация работы
+bool LED_WORK_FL = false;
 
 // ----- настройки радуги
 float RAINBOW_STEP = 5.00;         // шаг изменения цвета радуги
@@ -183,6 +186,26 @@ byte HUE_STEP = 5;
 #define BUTT_HASH   0x38379AD   // #
 #endif
 
+// ----- КНОПКИ СВОЕГО ПУЛЬТА -----
+#if REMOTE_TYPE == 4
+#define BUTT_UP     0x42
+#define BUTT_DOWN   0x41
+#define BUTT_LEFT   0x43
+#define BUTT_RIGHT  0x44
+#define BUTT_OK     0x45
+#define BUTT_1      0x31
+#define BUTT_2      0x32
+#define BUTT_3      0x33
+#define BUTT_4      0x34
+#define BUTT_5      0x35
+#define BUTT_6      0x36
+#define BUTT_7      0x37
+#define BUTT_8      0x38
+#define BUTT_9      0x39
+#define BUTT_0      0x30
+#define BUTT_STAR   0x46  // *
+#define BUTT_HASH   0x47  // #
+#endif
 
 // ------------------------------ ДЛЯ РАЗРАБОТЧИКОВ --------------------------------
 #define MODE_AMOUNT 9      // количество режимов
@@ -226,6 +249,7 @@ int maxLevel = 100;
 int MAX_CH = NUM_LEDS / 2;
 int hue;
 unsigned long main_timer, hue_timer, strobe_timer, running_timer, color_timer, rainbow_timer, eeprom_timer;
+unsigned long led_timer;
 float averK = 0.006;
 byte count;
 float index = (float)255 / MAX_CH;   // коэффициент перевода для палитры
@@ -342,6 +366,9 @@ void loop() {
 #endif
   mainLoop();       // главный цикл обработки и отрисовки
   eepromTick();     // проверка не пора ли сохранить настройки
+#if REMOTE_TYPE != 4
+  ledBlink();	    // мигание светодиода
+#endif
 }
 
 void mainLoop() {
@@ -684,11 +711,19 @@ float smartIncrFloat(float value, float incr_step, float mininmum, float maximum
 
 #if REMOTE_TYPE != 0
 void remoteTick() {
+#if REMOTE_TYPE <=3
   if (IRLremote.available())  {
     auto data = IRLremote.read();
     IRdata = data.command;
     ir_flag = true;
   }
+#else
+  if (Serial.available() > 0) {  //если пришли данные
+    IRdata =  Serial.read(); //Serial.readString().substring(0, 3).toInt();    //получаем ххх
+    ir_flag = true;
+    LED_WORK_FL = true;
+  }
+#endif
   if (ir_flag) { // если данные пришли
     eeprom_timer = millis();
     eeprom_flag = true;
@@ -979,3 +1014,16 @@ void eepromTick() {
       updateEEPROM();
     }
 }
+#if REMOTE_TYPE != 4
+void ledBlink() {
+  if (LED_WORK_FL) {
+    digitalWrite(LED_WORK, HIGH);
+    LED_WORK_FL = false;
+    led_timer = millis();
+  }
+  if (!LED_WORK_FL && ((millis() - led_timer) >= 100)) {
+    digitalWrite(LED_WORK, LOW);
+    led_timer = 0xFFFFFFFFUL;    
+  }
+}
+#endif
