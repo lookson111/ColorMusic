@@ -35,7 +35,7 @@ byte BRIGHTNESS = 200;      // яркость по умолчанию (0 - 255)
 
 // ----- пины подключения
 #define SOUND_R A2         // аналоговый пин вход аудио, правый канал
-#define SOUND_L A1         // аналоговый пин вход аудио, левый канал
+#define SOUND_L A4         // аналоговый пин вход аудио, левый канал
 #define SOUND_R_FREQ A3    // аналоговый пин вход аудио для режима с частотами (через кондер)
 #define BTN_PIN 3          // кнопка переключения режимов (PIN --- КНОПКА --- GND)
 
@@ -291,6 +291,9 @@ void setup() {
   pinMode(POT_GND, OUTPUT);
   digitalWrite(POT_GND, LOW);
   butt1.setTimeout(900);
+  
+  pinMode(LED_WORK, OUTPUT);
+  digitalWrite(LED_WORK, LOW);
 
   IRLremote.begin(IR_PIN);
 
@@ -366,7 +369,7 @@ void loop() {
 #endif
   mainLoop();       // главный цикл обработки и отрисовки
   eepromTick();     // проверка не пора ли сохранить настройки
-#if REMOTE_TYPE != 4
+#if REMOTE_TYPE == 4
   ledBlink();	    // мигание светодиода
 #endif
 }
@@ -719,7 +722,7 @@ void remoteTick() {
   }
 #else
   if (Serial.available() > 0) {  //если пришли данные
-    IRdata =  Serial.read(); //Serial.readString().substring(0, 3).toInt();    //получаем ххх
+    IRdata =  Serial.read();    //получаем ххх
     ir_flag = true;
     LED_WORK_FL = true;
   }
@@ -1014,7 +1017,7 @@ void eepromTick() {
       updateEEPROM();
     }
 }
-#if REMOTE_TYPE != 4
+#if REMOTE_TYPE == 4
 void ledBlink() {
   if (LED_WORK_FL) {
     digitalWrite(LED_WORK, HIGH);
