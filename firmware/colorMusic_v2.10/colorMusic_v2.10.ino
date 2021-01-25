@@ -96,6 +96,15 @@ uint16_t STROBE_PERIOD = 140;     // период вспышек, миллисе
 #define STROBE_SAT 0              // насыщенность. Если 0 - цвет будет БЕЛЫЙ при любом цвете (0 - 255)
 byte STROBE_SMOOTH = 200;         // скорость нарастания/угасания вспышки (0 - 255)
 
+// ----- режим огня
+#define HUE_GAP 21      // заброс по hue
+#define FIRE_STEP 15    // шаг огня
+#define HUE_START_FIRE 0     // начальный цвет огня (0 красный, 80 зелёный, 140 молния, 190 розовый)
+#define MIN_BRIGHT 70   // мин. яркость огня
+#define MAX_BRIGHT 255  // макс. яркость огня
+#define MIN_SAT 245     // мин. насыщенность
+#define MAX_SAT 255     // макс. насыщенность
+
 // ----- режим подсветки
 byte LIGHT_COLOR = 0;             // начальный цвет подсветки
 byte LIGHT_SAT = 255;             // начальная насыщенность подсветки
@@ -248,6 +257,7 @@ float averageLevel = 50;
 int maxLevel = 100;
 int MAX_CH = NUM_LEDS / 2;
 int hue;
+int counter = 0;
 unsigned long main_timer, hue_timer, strobe_timer, running_timer, color_timer, rainbow_timer, eeprom_timer;
 unsigned long led_timer;
 float averK = 0.006;
@@ -615,7 +625,12 @@ void animation() {
         for (int i = 0; i < NUM_LEDS; i++) leds[i] = CHSV(EMPTY_COLOR, 255, EMPTY_BRIGHT);
       break;
     case 6:
-      switch (light_mode) {
+			//int thisPos = 0, lastPos = 0;
+			for (int i = 0; i < NUM_LEDS; i++) {
+				leds[i] = getFireColor((inoise8(i * FIRE_STEP, counter)));
+			}
+			counter += 20;
+      /*switch (light_mode) {
         case 0: for (int i = 0; i < NUM_LEDS; i++) leds[i] = CHSV(LIGHT_COLOR, LIGHT_SAT, 255);
           break;
         case 1:
@@ -640,7 +655,7 @@ void animation() {
             if (rainbow_steps < 0) rainbow_steps = 255;
           }
           break;
-      }
+      }*/
       break;
     case 7:
       switch (freq_strobe_mode) {
@@ -1030,3 +1045,13 @@ void ledBlink() {
   }
 }
 #endif
+
+// возвращает цвет огня для одного пикселя
+CHSV getFireColor(int val) {
+  // чем больше val, тем сильнее сдвигается цвет, падает насыщеность и растёт яркость
+  return CHSV(
+           HUE_START_FIRE + map(val, 0, 255, 0, HUE_GAP),                    // H
+           constrain(map(val, 0, 255, MAX_SAT, MIN_SAT), 0, 255),       // S
+           constrain(map(val, 0, 255, MIN_BRIGHT, MAX_BRIGHT), 0, 255)  // V
+         );
+}
