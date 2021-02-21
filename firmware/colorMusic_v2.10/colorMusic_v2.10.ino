@@ -29,7 +29,7 @@
 #define SETTINGS_LOG 0      // вывод всех настроек из EEPROM в порт при запуске
 
 // ----- настройки ленты
-#define NUM_LEDS 60        // количество светодиодов (данная версия поддерживает до 410 штук)
+#define NUM_LEDS 350        // количество светодиодов (данная версия поддерживает до 350 штук)
 #define CURRENT_LIMIT 3000  // лимит по току в МИЛЛИАМПЕРАХ, автоматически управляет яркостью (пожалей свой блок питания!) 0 - выключить лимит
 byte BRIGHTNESS = 200;      // яркость по умолчанию (0 - 255)
 
@@ -118,6 +118,7 @@ byte RUNNING_SPEED = 11;
 // ----- режим анализатора спектра
 byte HUE_START = 0;
 byte HUE_STEP = 5;
+byte settings[2]; //Массив настроек
 #define LIGHT_SMOOTH 2
 
 /*
@@ -372,10 +373,64 @@ void setup() {
 #endif
 }
 
+void requestParametr() {
+  settings[0] = (byte)this_mode;
+  settings[2] = smartConvertByte(BRIGHTNESS, 0, 255);
+  settings[3] = smartConvertByte(EMPTY_BRIGHT, 0, 255);
+  switch (this_mode)
+  {
+    case 0:
+      settings[4] = smartConvertByte(SMOOTH, 0.05, 1); // Умножить на 100
+      break;
+    case 1:
+      settings[4] = smartConvertByte(SMOOTH, 0.05, 1);     //чтобы число было минимум 0.05 и максимум 1
+      settings[5] = smartConvertByte(RAINBOW_STEP, 0.5, 20);   //чтобы число было минимум 0.5 и максимум 20
+      break;
+    case 2:
+    case 3:
+      settings[4] = smartConvertByte(SMOOTH_FREQ, 0.05, 1);
+      settings[5] = smartConvertByte(MAX_COEF_FREQ, 0, 5);
+      break;
+    case 4:
+        settings[1] = (byte)light_mode;
+        settings[4] = smartConvertByte(SMOOTH_FREQ, 0.05, 1);
+        settings[5] = smartConvertByte(MAX_COEF_FREQ, 0, 5);
+      break;
+    case 5:
+      break;
+    case 6:
+      settings[1] = (byte)light_mode;
+        switch (light_mode) {
+          case 0: 
+            settings[4] = smartConvertByte(LIGHT_COLOR, 0, 255);
+            settings[5] = smartConvertByte(LIGHT_SAT, 0, 255);
+            break;
+          case 1: 
+            settings[4] = smartConvertByte(LIGHT_SAT, 0, 255);
+            settings[5] = smartConvertByte(COLOR_SPEED, 0, 255);
+            break;
+          case 2: 
+            settings[4] = smartConvertByte(RAINBOW_PERIOD, -20, 20);  //????????????? Написать правильный метод конвертации
+            settings[5] = smartConvertByte(RAINBOW_STEP_2, 0.5, 10);
+            break;
+            }
+      break;
+    case 7:
+      settings[1] = (byte)freq_strobe_mode;
+      settings[4] = smartConvertByte(RUNNING_SPEED, 1, 255);
+      settings[5] = smartConvertByte(MAX_COEF_FREQ, 0.0, 10);
+      break;
+    case 8:
+      settings[4] = smartConvertByte(HUE_STEP, 1, 255);
+      settings[5] = smartConvertByte(HUE_START, 0, 255);
+      break;  
+  }
+}
+
 void loop() {
   buttonTick();     // опрос и обработка кнопки
 #if REMOTE_TYPE != 0
-  remoteTick();     // опрос ИК пульта
+  remoteTick();     // опрос пульта
 #endif
   mainLoop();       // главный цикл обработки и отрисовки
   eepromTick();     // проверка не пора ли сохранить настройки
@@ -619,18 +674,18 @@ void animation() {
       }
       break;
     case 5:
-      if (strobe_bright > 0)
+      /*if (strobe_bright > 0)
         for (int i = 0; i < NUM_LEDS; i++) leds[i] = CHSV(STROBE_COLOR, STROBE_SAT, strobe_bright);
       else
-        for (int i = 0; i < NUM_LEDS; i++) leds[i] = CHSV(EMPTY_COLOR, 255, EMPTY_BRIGHT);
+        for (int i = 0; i < NUM_LEDS; i++) leds[i] = CHSV(EMPTY_COLOR, 255, EMPTY_BRIGHT);*/
+    //Режим стробоскопа заменён на режим огня
+    for (int i = 0; i < NUM_LEDS; i++) {
+        leds[i] = getFireColor((inoise8(i * FIRE_STEP, counter)));
+      }
+      counter += 20;
       break;
     case 6:
-			//int thisPos = 0, lastPos = 0;
-			for (int i = 0; i < NUM_LEDS; i++) {
-				leds[i] = getFireColor((inoise8(i * FIRE_STEP, counter)));
-			}
-			counter += 20;
-      /*switch (light_mode) {
+	     switch (light_mode) {
         case 0: for (int i = 0; i < NUM_LEDS; i++) leds[i] = CHSV(LIGHT_COLOR, LIGHT_SAT, 255);
           break;
         case 1:
@@ -655,7 +710,7 @@ void animation() {
             if (rainbow_steps < 0) rainbow_steps = 255;
           }
           break;
-      }*/
+      }
       break;
     case 7:
       switch (freq_strobe_mode) {
@@ -727,7 +782,21 @@ float smartIncrFloat(float value, float incr_step, float mininmum, float maximum
   return val_buf;
 }
 
+float smartConvertFloat(float value, float mininmum, float maximum, boolean invert) {
+  if (invert) value = (value - 100) * (-1);
+  float val_buf = value / (100/maximum);
+  val_buf = constrain(val_buf, mininmum, maximum);
+  return val_buf;
+}
+
+byte smartConvertByte(float value, float mininmum, float maximum) {
+  float val_buf = value / (maximum/100);
+  //val_buf = constrain(val_buf, mininmum, maximum);
+  return (byte)val_buf;
+}
+
 #if REMOTE_TYPE != 0
+
 void remoteTick() {
 #if REMOTE_TYPE <=3
   if (IRLremote.available())  {
@@ -736,15 +805,206 @@ void remoteTick() {
     ir_flag = true;
   }
 #else
+  
+  
   if (Serial.available() > 0) {  //если пришли данные
-    IRdata =  Serial.read();    //получаем ххх
-    ir_flag = true;
-    LED_WORK_FL = true;
+    int sum = 0;
+    for (int i = 0; i < 2; ++i) {
+      if (Serial.available() <= 0) {
+        ir_flag = false;
+        break;
+      }
+      settings[i] = Serial.read();
+      sum += settings[i];
+      delay(5);
+      ir_flag = true;
+    }
+    if (sum <= 1) {
+        ir_flag = false;
+    }
+      
+
+    //IRdata =  Serial.read();    //получаем ххх
+    
+    
   }
 #endif
+  
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
   if (ir_flag) { // если данные пришли
     eeprom_timer = millis();
     eeprom_flag = true;
+    LED_WORK_FL = true;
+    //byte settt[] = {2,5,44,77,33,55,66,77};
+    //if (settings[0] == 10)
+    //{
+    //   requestParametr();
+    //   for (int i = 0; i < 8; ++i) {
+    //   Serial.write(settings[i]);
+    //   //Serial.print(" ");
+    //   }
+    //}
+
+    //if (settings[6] == 1) //Если пришла команда выключения или включения
+    //{
+    //  ONstate = !ONstate; 
+    //  FastLED.clear(); 
+    //  FastLED.show(); 
+    //  updateEEPROM();
+    //}
+    //if (settings[7] == 1) //Если пришла команда настройки шума
+    //{
+    //   fullLowPass();
+    //}
+
+    // if (settings[0] <= 8)
+    // {
+    //  this_mode = settings[0];
+    //  FastLED.setBrightness(smartConvertFloat(settings[2], 0, 255));
+    // EMPTY_BRIGHT = smartConvertFloat(settings[3], 0, 255);
+    // }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    switch (settings[0]) {
+      case 0: break;
+      case 1: 
+        if (settings[1] == 1) {
+            ONstate = !ONstate; 
+            FastLED.clear(); 
+            FastLED.show(); 
+            updateEEPROM();
+        }
+        break;
+      case 2:
+        if (settings[1] == 1) {
+            fullLowPass();
+        }
+        break;
+      case 3:
+        if (settings[1] <= 8) {
+            this_mode = settings[1];
+        }
+        break;
+      case 4:
+        switch (this_mode) {
+          case 4:
+          case 6:
+            light_mode = (int8_t)settings[1];
+            break;
+          case 7:
+            freq_strobe_mode = (int8_t)settings[1];
+            break;
+        }
+        break;
+      case 5:
+        FastLED.setBrightness(smartConvertFloat(settings[1], 0, 255, false));
+        break;
+      case 6:
+        EMPTY_BRIGHT = smartConvertFloat(settings[1], 0, 255, false);
+        break;
+      case 7:
+        SMOOTH = smartConvertFloat(settings[1], 0.05, 1, true);
+        break;
+      case 8:
+        RAINBOW_STEP = smartConvertFloat(settings[1], 0.5, 20, false);   //чтобы число было минимум 0.5 и максимум 20
+        break;
+      case 9:
+        SMOOTH_FREQ = smartConvertFloat(settings[1], 0.05, 1, true);
+        break;
+      case 10:
+        MAX_COEF_FREQ = smartConvertFloat(settings[1], 0, 5, true);
+        break;
+      case 11:
+        LIGHT_COLOR = smartConvertFloat(settings[1], 0, 255, false);
+        break;
+      case 12:
+        LIGHT_SAT = smartConvertFloat(settings[1], 0, 255, false);
+        break;
+      case 13:
+        COLOR_SPEED = smartConvertFloat(settings[1], 0, 255, true);
+        break;
+      case 14:
+        RAINBOW_PERIOD = smartConvertFloat(settings[1], -20, 20, false);  //????????????? Написать правильный метод конвертации
+        break;
+      case 15:
+        RAINBOW_STEP_2 = smartConvertFloat(settings[1], 0.5, 10, true);
+        break;
+      case 16:
+        RUNNING_SPEED = smartConvertFloat(settings[1], 1, 255, true);
+        break;
+      case 17:
+        HUE_STEP = smartConvertFloat(settings[1], 1, 255, false);
+        break;
+      case 18:
+        HUE_START = smartConvertFloat(settings[1], 0, 255, false);
+        break;
+      default: eeprom_flag = false;   // если не распознали кнопку, не обновляем настройки!
+    }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    // switch (settings[0]) {
+    //   case 0: 
+    //     SMOOTH = smartConvertFloat(settings[4], 0.05, 1);
+    //     break;
+    //   case 1: 
+    //     SMOOTH = smartConvertFloat(settings[4], 0.05, 1);     //чтобы число было минимум 0.05 и максимум 1
+    //     RAINBOW_STEP = smartConvertFloat(settings[5], 0.5, 20);   //чтобы число было минимум 0.5 и максимум 20
+    //     break;
+    //   case 2:
+    //   case 3: 
+    //     SMOOTH_FREQ = smartConvertFloat(settings[4], 0.05, 1);
+    //     MAX_COEF_FREQ = smartConvertFloat(settings[5], 0, 5);
+    //     break;
+    //   case 4: 
+    //     light_mode = (int8_t)settings[1];
+    //     SMOOTH_FREQ = smartConvertFloat(settings[4], 0.05, 1);
+    //     MAX_COEF_FREQ = smartConvertFloat(settings[5], 0, 5);
+    //     break;
+    //   case 5: 
+    //     break;
+    //   case 6: 
+    //     light_mode = (int8_t)settings[1];
+    //     switch (settings[1]) {
+    //       case 0: 
+    //         LIGHT_COLOR = smartConvertFloat(settings[4], 0, 255);
+    //         LIGHT_SAT = smartConvertFloat(settings[5], 0, 255);
+    //         break;
+    //       case 1: 
+    //         LIGHT_SAT = smartConvertFloat(settings[4], 0, 255);
+    //         COLOR_SPEED = smartConvertFloat(settings[5], 0, 255);
+    //         break;
+    //       case 2: 
+    //         RAINBOW_PERIOD = smartConvertFloat(settings[4], -20, 20);  //????????????? Написать правильный метод конвертации
+    //         RAINBOW_STEP_2 = smartConvertFloat(settings[5], 0.5, 10);
+    //         break;
+    //           }
+    //     break;
+    //   case 7: 
+    //     freq_strobe_mode = (int8_t)settings[1];
+    //     RUNNING_SPEED = smartConvertFloat(settings[4], 1, 255);
+    //     MAX_COEF_FREQ = smartConvertFloat(settings[5], 0.0, 10);
+    //     break;
+    //   case 8: 
+    //     HUE_STEP = smartConvertFloat(settings[4], 1, 255);
+    //     HUE_START = smartConvertFloat(settings[5], 0, 255);
+    //     break;
+    //   default: eeprom_flag = false;   // если не распознали кнопку, не обновляем настройки!
+    //     break;
+    // }
+    // Нужны кнопки настройки шумов и включения и отключения
+    ir_flag = false;
+    for (int j = 0; j < 2; ++j)
+    {
+      Serial.print(F("SETTING "));
+      Serial.print(j);
+      Serial.print(F(" = "));
+      Serial.println(settings[j]);
+    }/*
+    
     switch (IRdata) {
       // режимы
       case BUTT_1: this_mode = 0;
@@ -914,8 +1174,9 @@ void remoteTick() {
         break;
       default: eeprom_flag = false;   // если не распознали кнопку, не обновляем настройки!
         break;
-    }
-    ir_flag = false;
+    }*/
+    
+    /////////////////////////////////////////////////////////////////////////////////////////////////
   }
 }
 #endif
