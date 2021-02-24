@@ -11,16 +11,16 @@
 */
 
 /*
-   Версия 2.10
+   Версия 2.10 - Версия Гайвера
+   Версия 3.10 - Версия с управлением через blutooth.
    Исправлен глюк с большим количеством светодиодов на МЕГЕ
 */
 
 
 // ***************************** НАСТРОЙКИ *****************************
 
-// ----- настройка ИК пульта
-#define REMOTE_TYPE 4       // 0 - без пульта, 1 - пульт от WAVGAT, 2 - пульт от KEYES, 3 - кастомный пульт 4 - блутуз
-// система может работать С ЛЮБЫМ ИК ПУЛЬТОМ (практически). Коды для своего пульта можно задать начиная со строки 160 в прошивке. Коды пультов определяются скетчем IRtest_2.0, читай инструкцию
+// ----- настройка пульта
+#define REMOTE_TYPE 4       // 4 - блутуз. Остальные варианты вырезаны для экономии памяти. НЕ МЕНЯТЬ.
 
 // ----- настройки параметров
 #define KEEP_SETTINGS 1     // хранить ВСЕ настройки в энергонезависимой памяти
@@ -50,7 +50,7 @@ byte BRIGHTNESS = 200;      // яркость по умолчанию (0 - 255)
 #endif
 
 #define POT_GND A0              // пин земля для потенциометра
-#define IR_PIN 2                // пин ИК приёмника
+//#define IR_PIN 2                // пин ИК приёмника
 
 int  LED_WORK = A1;      // LED индикация работы
 bool LED_WORK_FL = false;
@@ -90,11 +90,11 @@ float MAX_COEF_FREQ = 1.2;        // коэффициент порога для 
 #define HIGH_COLOR HUE_YELLOW     // цвет высоких
 
 // ----- режим стробоскопа
-uint16_t STROBE_PERIOD = 140;     // период вспышек, миллисекунды
-#define STROBE_DUTY 20            // скважность вспышек (1 - 99) - отношение времени вспышки ко времени темноты
-#define STROBE_COLOR HUE_YELLOW   // цвет стробоскопа
-#define STROBE_SAT 0              // насыщенность. Если 0 - цвет будет БЕЛЫЙ при любом цвете (0 - 255)
-byte STROBE_SMOOTH = 200;         // скорость нарастания/угасания вспышки (0 - 255)
+//uint16_t STROBE_PERIOD = 140;     // период вспышек, миллисекунды
+//#define STROBE_DUTY 20            // скважность вспышек (1 - 99) - отношение времени вспышки ко времени темноты
+//#define STROBE_COLOR HUE_YELLOW   // цвет стробоскопа
+//#define STROBE_SAT 0              // насыщенность. Если 0 - цвет будет БЕЛЫЙ при любом цвете (0 - 255)
+//byte STROBE_SMOOTH = 200;         // скорость нарастания/угасания вспышки (0 - 255)
 
 // ----- режим огня
 #define HUE_GAP 21      // заброс по hue
@@ -118,7 +118,7 @@ byte RUNNING_SPEED = 11;
 // ----- режим анализатора спектра
 byte HUE_START = 0;
 byte HUE_STEP = 5;
-byte settings[2]; //Массив настроек
+byte settings[2];  //Массив настроек для получения команд через blutooth
 #define LIGHT_SMOOTH 2
 
 /*
@@ -132,69 +132,6 @@ byte settings[2]; //Массив настроек
   HUE_PURPLE
   HUE_PINK
 */
-
-// ----- КНОПКИ ПУЛЬТА WAVGAT -----
-#if REMOTE_TYPE == 1
-#define BUTT_UP     0xF39EEBAD
-#define BUTT_DOWN   0xC089F6AD
-#define BUTT_LEFT   0xE25410AD
-#define BUTT_RIGHT  0x14CE54AD
-#define BUTT_OK     0x297C76AD
-#define BUTT_1      0x4E5BA3AD
-#define BUTT_2      0xE51CA6AD
-#define BUTT_3      0xE207E1AD
-#define BUTT_4      0x517068AD
-#define BUTT_5      0x1B92DDAD
-#define BUTT_6      0xAC2A56AD
-#define BUTT_7      0x5484B6AD
-#define BUTT_8      0xD22353AD
-#define BUTT_9      0xDF3F4BAD
-#define BUTT_0      0xF08A26AD
-#define BUTT_STAR   0x68E456AD
-#define BUTT_HASH   0x151CD6AD
-#endif
-
-// ----- КНОПКИ ПУЛЬТА KEYES -----
-#if REMOTE_TYPE == 2
-#define BUTT_UP     0xE51CA6AD
-#define BUTT_DOWN   0xD22353AD
-#define BUTT_LEFT   0x517068AD
-#define BUTT_RIGHT  0xAC2A56AD
-#define BUTT_OK     0x1B92DDAD
-#define BUTT_1      0x68E456AD
-#define BUTT_2      0xF08A26AD
-#define BUTT_3      0x151CD6AD
-#define BUTT_4      0x18319BAD
-#define BUTT_5      0xF39EEBAD
-#define BUTT_6      0x4AABDFAD
-#define BUTT_7      0xE25410AD
-#define BUTT_8      0x297C76AD
-#define BUTT_9      0x14CE54AD
-#define BUTT_0      0xC089F6AD
-#define BUTT_STAR   0xAF3F1BAD
-#define BUTT_HASH   0x38379AD
-#endif
-
-// ----- КНОПКИ СВОЕГО ПУЛЬТА -----
-#if REMOTE_TYPE == 3
-#define BUTT_UP     0xE51CA6AD
-#define BUTT_DOWN   0xD22353AD
-#define BUTT_LEFT   0x517068AD
-#define BUTT_RIGHT  0xAC2A56AD
-#define BUTT_OK     0x1B92DDAD
-#define BUTT_1      0x68E456AD
-#define BUTT_2      0xF08A26AD
-#define BUTT_3      0x151CD6AD
-#define BUTT_4      0x18319BAD
-#define BUTT_5      0xF39EEBAD
-#define BUTT_6      0x4AABDFAD
-#define BUTT_7      0xE25410AD
-#define BUTT_8      0x297C76AD
-#define BUTT_9      0x14CE54AD
-#define BUTT_0      0xC089F6AD
-#define BUTT_STAR   0xAF3F1BAD  // *
-#define BUTT_HASH   0x38379AD   // #
-#endif
 
 // ------------------------------ ДЛЯ РАЗРАБОТЧИКОВ --------------------------------
 #define MODE_AMOUNT 9      // количество режимов
@@ -215,9 +152,9 @@ CRGB leds[NUM_LEDS];
 #include "GyverButton.h"
 GButton butt1(BTN_PIN);
 
-#include "IRLremote.h"
-CHashIR IRLremote;
-uint32_t IRdata;
+//#include "IRLremote.h"
+//CHashIR IRLremote;
+//uint32_t IRdata;
 
 // градиент-палитра от зелёного к красному
 DEFINE_GRADIENT_PALETTE(soundlevel_gp) {
@@ -238,22 +175,22 @@ int maxLevel = 100;
 int MAX_CH = NUM_LEDS / 2;
 int hue;
 int counter = 0;
-unsigned long main_timer, hue_timer, strobe_timer, running_timer, color_timer, rainbow_timer, eeprom_timer;
+unsigned long main_timer, running_timer, color_timer, rainbow_timer, eeprom_timer; //hue_timer, strobe_timer,
 unsigned long led_timer;
 float averK = 0.006;
 byte count;
 float index = (float)255 / MAX_CH;   // коэффициент перевода для палитры
-boolean lowFlag;
+//boolean lowFlag;
 byte low_pass;
 int RcurrentLevel, LcurrentLevel;
 int colorMusic[3];
 float colorMusic_f[3], colorMusic_aver[3];
-boolean colorMusicFlash[3], strobeUp_flag, strobeDwn_flag;
+boolean colorMusicFlash[3]; //strobeUp_flag, , strobeDwn_flag
 byte this_mode = MODE;
-int thisBright[3], strobe_bright = 0;
-unsigned int light_time = STROBE_PERIOD * STROBE_DUTY / 100;
+int thisBright[3]; //, strobe_bright = 0
+//unsigned int light_time = STROBE_PERIOD * STROBE_DUTY / 100;
 volatile boolean ir_flag;
-boolean settings_mode, ONstate = true;
+boolean ONstate = true; //settings_mode,
 int8_t freq_strobe_mode, light_mode;
 int freq_max;
 float freq_max_f, rainbow_steps;
@@ -285,7 +222,7 @@ void setup() {
   pinMode(LED_WORK, OUTPUT);
   digitalWrite(LED_WORK, LOW);
 
-  IRLremote.begin(IR_PIN);
+  //IRLremote.begin(IR_PIN);
 
   // для увеличения точности уменьшаем опорное напряжение,
   // выставив EXTERNAL и подключив Aref к выходу 3.3V на плате через делитель
@@ -335,13 +272,13 @@ void setup() {
   Serial.print(F("light_mode = ")); Serial.println(light_mode);
   Serial.print(F("RAINBOW_STEP = ")); Serial.println(RAINBOW_STEP);
   Serial.print(F("MAX_COEF_FREQ = ")); Serial.println(MAX_COEF_FREQ);
-  Serial.print(F("STROBE_PERIOD = ")); Serial.println(STROBE_PERIOD);
+  //Serial.print(F("STROBE_PERIOD = ")); Serial.println(STROBE_PERIOD);
   Serial.print(F("LIGHT_SAT = ")); Serial.println(LIGHT_SAT);
   Serial.print(F("RAINBOW_STEP_2 = ")); Serial.println(RAINBOW_STEP_2);
   Serial.print(F("HUE_START = ")); Serial.println(HUE_START);
   Serial.print(F("SMOOTH = ")); Serial.println(SMOOTH);
   Serial.print(F("SMOOTH_FREQ = ")); Serial.println(SMOOTH_FREQ);
-  Serial.print(F("STROBE_SMOOTH = ")); Serial.println(STROBE_SMOOTH);
+  //Serial.print(F("STROBE_SMOOTH = ")); Serial.println(STROBE_SMOOTH);
   Serial.print(F("LIGHT_COLOR = ")); Serial.println(LIGHT_COLOR);
   Serial.print(F("COLOR_SPEED = ")); Serial.println(COLOR_SPEED);
   Serial.print(F("RAINBOW_PERIOD = ")); Serial.println(RAINBOW_PERIOD);
@@ -352,25 +289,26 @@ void setup() {
 #endif
 }
 
-void requestParametr() {
-
+//Метод для запроса параметров для последующей передачи через blutooth
+void requestParametr() { 
   Serial.write((byte)this_mode);
-  Serial.write(smartConvertByte(BRIGHTNESS, 0, 255, false));
-  Serial.write(smartConvertByte(EMPTY_BRIGHT, 0, 255, false));
-  Serial.write(smartConvertByte(SMOOTH, 0.05, 1, true));
-  Serial.write(smartConvertByte(RAINBOW_STEP, 0.5, 20, false));
-  Serial.write(smartConvertByte(SMOOTH_FREQ, 0.05, 1, true));
-  Serial.write(smartConvertByte(MAX_COEF_FREQ, 0, 5, true));
-  Serial.write(smartConvertByte(LIGHT_COLOR, 0, 255, false));
-  Serial.write(smartConvertByte(LIGHT_SAT, 0, 255, false));
-  Serial.write(smartConvertByte(COLOR_SPEED, 0, 255, true));
-  Serial.write(smartConvertByte(RAINBOW_PERIOD, -20, 20, false)); //????????????? Написать правильный метод конвертации
-  Serial.write(smartConvertByte(RAINBOW_STEP_2, 0.5, 10, true));
-  Serial.write(smartConvertByte(RUNNING_SPEED, 1, 255, true));
-  Serial.write(smartConvertByte(HUE_STEP, 1, 255, false));
-  Serial.write(smartConvertByte(HUE_START, 0, 255, false));
+  Serial.write((byte)mapFloat(BRIGHTNESS, 0, 255, 0, 100, false)); //value из (0-255) в (0-100)
+  Serial.write((byte)mapFloat(EMPTY_BRIGHT, 0, 255, 0, 100, false)); //value из (0-255) в (0-100)
+  Serial.write((byte)mapFloat(SMOOTH, 0.05, 1, 0, 100, true)); //value из (0.05-1) в (0-100)
+  Serial.write((byte)mapFloat(RAINBOW_STEP, 0.5, 20, 0, 100, false)); //value из (0.5-20) в (0-100)
+  Serial.write((byte)mapFloat(SMOOTH_FREQ, 0.05, 1, 0, 100, true)); //value из (0.05-1) в (0-100)
+  Serial.write((byte)mapFloat(MAX_COEF_FREQ, 0, 5, 0, 100, true)); //value из (0-5) в (0-100)
+  Serial.write((byte)mapFloat(LIGHT_COLOR, 0, 255, 0, 100, false)); //value из (0-255) в (0-100)
+  Serial.write((byte)mapFloat(LIGHT_SAT, 0, 255, 0, 100, false)); //value из (0-255) в (0-100)
+  Serial.write((byte)mapFloat(COLOR_SPEED, 0, 255, 0, 100, true)); //value из (0-255) в (0-100)
+  Serial.write((byte)mapFloat(RAINBOW_PERIOD, -20, 20, 0, 100, false)); //value из (-20-20) в (0-100)
+  Serial.write((byte)mapFloat(RAINBOW_STEP_2, 0.5, 10, 0, 100, true)); //value из (0.5-10) в (0-100)
+  Serial.write((byte)mapFloat(RUNNING_SPEED, 1, 255, 0, 100, true)); //value из (1-255) в (0-100)
+  Serial.write((byte)mapFloat(HUE_STEP, 1, 255, 0, 100, false)); //value из (1-255) в (0-100)
+  Serial.write((byte)mapFloat(HUE_START, 0, 255, 0, 100, false)); //value из (0-255) в (0-100)
 }
 
+//Главный цикл
 void loop() {
   buttonTick();     // опрос и обработка кнопки
 #if REMOTE_TYPE != 0
@@ -383,8 +321,8 @@ void loop() {
 #endif
 }
 
+// главный цикл отрисовки
 void mainLoop() {
-  // главный цикл отрисовки
   if (ONstate) {
     if (millis() - main_timer > MAIN_LOOP) {
       // сбрасываем значения
@@ -495,36 +433,36 @@ void mainLoop() {
         animation();
       }
       if (this_mode == 5) {
-        if ((long)millis() - strobe_timer > STROBE_PERIOD) {
-          strobe_timer = millis();
-          strobeUp_flag = true;
-          strobeDwn_flag = false;
-        }
-        if ((long)millis() - strobe_timer > light_time) {
-          strobeDwn_flag = true;
-        }
-        if (strobeUp_flag) {                    // если настало время пыхнуть
-          if (strobe_bright < 255)              // если яркость не максимальная
-            strobe_bright += STROBE_SMOOTH;     // увелчить
-          if (strobe_bright > 255) {            // если пробили макс. яркость
-            strobe_bright = 255;                // оставить максимум
-            strobeUp_flag = false;              // флаг опустить
-          }
-        }
+        // if ((long)millis() - strobe_timer > STROBE_PERIOD) {
+        //   strobe_timer = millis();
+        //   strobeUp_flag = true;
+        //   strobeDwn_flag = false;
+        // }
+        // if ((long)millis() - strobe_timer > light_time) {
+        //   strobeDwn_flag = true;
+        // }
+        // if (strobeUp_flag) {                    // если настало время пыхнуть
+        //   if (strobe_bright < 255)              // если яркость не максимальная
+        //     strobe_bright += STROBE_SMOOTH;     // увелчить
+        //   if (strobe_bright > 255) {            // если пробили макс. яркость
+        //     strobe_bright = 255;                // оставить максимум
+        //     strobeUp_flag = false;              // флаг опустить
+        //   }
+        // }
 
-        if (strobeDwn_flag) {                   // гаснем
-          if (strobe_bright > 0)                // если яркость не минимальная
-            strobe_bright -= STROBE_SMOOTH;     // уменьшить
-          if (strobe_bright < 0) {              // если пробили мин. яркость
-            strobeDwn_flag = false;
-            strobe_bright = 0;                  // оставить 0
-          }
-        }
+        // if (strobeDwn_flag) {                   // гаснем
+        //   if (strobe_bright > 0)                // если яркость не минимальная
+        //     strobe_bright -= STROBE_SMOOTH;     // уменьшить
+        //   if (strobe_bright < 0) {              // если пробили мин. яркость
+        //     strobeDwn_flag = false;
+        //     strobe_bright = 0;                  // оставить 0
+        //   }
+        // }
         animation();
       }
       if (this_mode == 6) animation();
 
-      if (!IRLremote.receiving())    // если на ИК приёмник не приходит сигнал (без этого НЕ РАБОТАЕТ!)
+      //if (!IRLremote.receiving())    // если на ИК приёмник не приходит сигнал (без этого НЕ РАБОТАЕТ!)
         FastLED.show();         // отправить значения на ленту
 
       if (this_mode != 7)       // 7 режиму не нужна очистка!!!
@@ -533,7 +471,7 @@ void mainLoop() {
     }
   }
 }
-
+//Отрисовка 
 void animation() {
   // согласно режиму
   switch (this_mode) {
@@ -618,10 +556,6 @@ void animation() {
       }
       break;
     case 5:
-      /*if (strobe_bright > 0)
-        for (int i = 0; i < NUM_LEDS; i++) leds[i] = CHSV(STROBE_COLOR, STROBE_SAT, strobe_bright);
-      else
-        for (int i = 0; i < NUM_LEDS; i++) leds[i] = CHSV(EMPTY_COLOR, 255, EMPTY_BRIGHT);*/
     //Режим стробоскопа заменён на режим огня
     for (int i = 0; i < NUM_LEDS; i++) {
         leds[i] = getFireColor((inoise8(i * FIRE_STEP, counter)));
@@ -699,59 +633,73 @@ void animation() {
       break;
   }
 }
-
+//Высокие частоты
 void HIGHS() {
   for (int i = 0; i < NUM_LEDS; i++) leds[i] = CHSV(HIGH_COLOR, 255, thisBright[2]);
 }
+//Средние частоты
 void MIDS() {
   for (int i = 0; i < NUM_LEDS; i++) leds[i] = CHSV(MID_COLOR, 255, thisBright[1]);
 }
+//Низкие частоты
 void LOWS() {
   for (int i = 0; i < NUM_LEDS; i++) leds[i] = CHSV(LOW_COLOR, 255, thisBright[0]);
 }
+//Выключено
 void SILENCE() {
   for (int i = 0; i < NUM_LEDS; i++) leds[i] = CHSV(EMPTY_COLOR, 255, EMPTY_BRIGHT);
 }
 
 // вспомогательная функция, изменяет величину value на шаг incr в пределах minimum.. maximum
-int smartIncr(int value, int incr_step, int mininmum, int maximum) {
-  int val_buf = value + incr_step;
-  val_buf = constrain(val_buf, mininmum, maximum);
-  return val_buf;
-}
+// int smartIncr(int value, int incr_step, int mininmum, int maximum) {
+//   int val_buf = value + incr_step;
+//   val_buf = constrain(val_buf, mininmum, maximum);
+//   return val_buf;
+// }
 
-float smartIncrFloat(float value, float incr_step, float mininmum, float maximum) {
-  float val_buf = value + incr_step;
-  val_buf = constrain(val_buf, mininmum, maximum);
-  return val_buf;
-}
+// float smartIncrFloat(float value, float incr_step, float mininmum, float maximum) {
+//   float val_buf = value + incr_step;
+//   val_buf = constrain(val_buf, mininmum, maximum);
+//   return val_buf;
+// }
 
-float smartConvertFloat(float value, float mininmum, float maximum, boolean invert) {
-  if (invert) value = (value - 100) * (-1);
-  float val_buf = value / (100/maximum);
-  val_buf = constrain(val_buf, mininmum, maximum);
-  return val_buf;
-}
-
-byte smartConvertByte(float value, float mininmum, float maximum, boolean invert) {
-  float val_buf = value / (maximum/100);
-  if (invert) val_buf = (val_buf - 100) * (-1);
-  return (byte)val_buf;
+// Метод преобразует входное значение 0-100 в значение соответствующее минмальному и максимальному параметру, и инвертирует, если необходимо.
+//Например smartConvertFloat(100, 0, 255, true) вернёт 0, а smartConvertFloat(0, 0, 255, true) вернёт 255.
+// float smartConvertFloat(float value, float mininmum, float maximum, boolean invert) {
+//   if (invert) value = (value - 100) * (-1);
+//   float val_buf = value / (100/maximum);
+//   val_buf = constrain(val_buf, mininmum, maximum);
+//   return val_buf;
+// }
+// Метод преобразует входное значение соответствующее минмальному и максимальному параметру в значение 0-100, и инвертирует, если необходимо.
+// Например smartConvertByte(1, 0.05, 1, false) вернёт 100, smartConvertByte(0.05, 0.05, 1, false) вернёт 0.
+// byte smartConvertByte(float value, float mininmum, float maximum, boolean invert) {
+//   float val_buf = value / (maximum/100);
+//   if (invert) val_buf = (val_buf - 100) * (-1);
+//   return (byte)val_buf;
+// }
+//mapFloat(val, 0, 100, -20, 20, false) Конвертирует входное значение из текущего диапазона от 0 до 100 в новый диапазон от -20 до 20.
+float mapFloat(float value, float in_min, float in_max, float out_min, float out_max, boolean invert) {
+  if (invert) {
+    if (in_min < 0) value = value * (-1); else value = (value - in_max) * (-1);
+  }
+  float val_buf = (value - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+  return constrain(val_buf, out_min, out_max);
 }
 
 #if REMOTE_TYPE != 0
 
 void remoteTick() {
-#if REMOTE_TYPE <=3
-  if (IRLremote.available())  {
-    auto data = IRLremote.read();
-    IRdata = data.command;
-    ir_flag = true;
-  }
-#else
+// #if REMOTE_TYPE <=3
+//   if (IRLremote.available())  {
+//     auto data = IRLremote.read();
+//     IRdata = data.command;
+//     ir_flag = true;
+//   }
+// #else
   
   
-  if (Serial.available() > 0) {  //если пришли данные
+  if (Serial.available() > 0) {  //если пришли данные считываем и записываем в settings[0] и settings[1]
     int sum = 0;
     for (int i = 0; i < 2; ++i) {
       if (Serial.available() <= 0) {
@@ -766,15 +714,10 @@ void remoteTick() {
     if (sum <= 1) {
         ir_flag = false;
     }
-      
-
-    //IRdata =  Serial.read();    //получаем ххх
-    
-    
   }
-#endif
+//#endif
   
-
+//Получаем данные в виде двух байтов в формате XY, где X это адрес значения, а Y это значение.
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
   if (ir_flag) { // если данные пришли
     eeprom_timer = millis();
@@ -818,235 +761,67 @@ void remoteTick() {
         }
         break;
       case 5:
-        FastLED.setBrightness(smartConvertFloat(settings[1], 0, 255, false));
+        BRIGHTNESS = mapFloat(settings[1], 0, 100, 0, 255, false); //value из (0-100) в (0-255)
+        FastLED.setBrightness(BRIGHTNESS);
         break;
       case 6:
-        EMPTY_BRIGHT = smartConvertFloat(settings[1], 0, 255, false);
+        EMPTY_BRIGHT = mapFloat(settings[1], 0, 100, 0, 255, false); //value из (0-100) в (0-255)
         break;
       case 7:
-        SMOOTH = smartConvertFloat(settings[1], 0.05, 1, true);
+        SMOOTH = mapFloat(settings[1], 0, 100, 0.05, 1, true); //value из (0-100) в (0.05-1)
         break;
       case 8:
-        RAINBOW_STEP = smartConvertFloat(settings[1], 0.5, 20, false);   //чтобы число было минимум 0.5 и максимум 20
+        RAINBOW_STEP = mapFloat(settings[1], 0, 100, 0.5, 20, false); //value из (0-100) в (0.5-20)
         break;
       case 9:
-        SMOOTH_FREQ = smartConvertFloat(settings[1], 0.05, 1, true);
+        SMOOTH_FREQ = mapFloat(settings[1], 0, 100, 0.05, 1, true); //value из (0-100) в (0.05-1)
         break;
       case 10:
-        MAX_COEF_FREQ = smartConvertFloat(settings[1], 0, 5, true);
+        MAX_COEF_FREQ = mapFloat(settings[1], 0, 100, 0, 5, true); //value из (0-100) в (0-5)
         break;
       case 11:
-        LIGHT_COLOR = smartConvertFloat(settings[1], 0, 255, false);
+        LIGHT_COLOR = mapFloat(settings[1], 0, 100, 0, 255, false); //value из (0-100) в (0-255)
         break;
       case 12:
-        LIGHT_SAT = smartConvertFloat(settings[1], 0, 255, false);
+        LIGHT_SAT = mapFloat(settings[1], 0, 100, 0, 255, false); //value из (0-100) в (0-255)
         break;
       case 13:
-        COLOR_SPEED = smartConvertFloat(settings[1], 0, 255, true);
+        COLOR_SPEED = mapFloat(settings[1], 0, 100, 0, 255, true); //value из (0-100) в (0-255)
         break;
       case 14:
-        RAINBOW_PERIOD = smartConvertFloat(settings[1], -20, 20, false);  //????????????? Написать правильный метод конвертации
+        RAINBOW_PERIOD = mapFloat(settings[1], 0, 100, -20, 20, false); //value из (0-100) в (-20-20)
         break;
       case 15:
-        RAINBOW_STEP_2 = smartConvertFloat(settings[1], 0.5, 10, true);
+        RAINBOW_STEP_2 = mapFloat(settings[1], 0, 100, 0.5, 10, true); //value из (0-100) в (-20-20)
         break;
       case 16:
-        RUNNING_SPEED = smartConvertFloat(settings[1], 1, 255, true);
+        RUNNING_SPEED = mapFloat(settings[1], 0, 100, 1, 255, true); //value из (0-100) в (1-255)
         break;
       case 17:
-        HUE_STEP = smartConvertFloat(settings[1], 1, 255, false);
+        HUE_STEP = mapFloat(settings[1], 0, 100, 1, 255, false); //value из (0-100) в (1-255)
         break;
       case 18:
-        HUE_START = smartConvertFloat(settings[1], 0, 255, false);
+        HUE_START = mapFloat(settings[1], 0, 100, 0, 255, false); //value из (0-100) в (0-255)
         break;
       default: eeprom_flag = false;   // если не распознали кнопку, не обновляем настройки!
     }
 
     ir_flag = false;
-    for (int j = 0; j < 2; ++j)
-    {
-      Serial.print(F("SETTING "));
-      Serial.print(j);
-      Serial.print(F(" = "));
-      Serial.println(settings[j]);
-    }/*
-    
-    switch (IRdata) {
-      // режимы
-      case BUTT_1: this_mode = 0;
-        break;
-      case BUTT_2: this_mode = 1;
-        break;
-      case BUTT_3: this_mode = 2;
-        break;
-      case BUTT_4: this_mode = 3;
-        break;
-      case BUTT_5: this_mode = 4;
-        break;
-      case BUTT_6: this_mode = 5;
-        break;
-      case BUTT_7: this_mode = 6;
-        break;
-      case BUTT_8: this_mode = 7;
-        break;
-      case BUTT_9: this_mode = 8;
-        break;
-      case BUTT_0: fullLowPass();
-        break;
-      case BUTT_STAR: ONstate = !ONstate; FastLED.clear(); FastLED.show(); updateEEPROM();
-        break;
-      case BUTT_HASH:
-        switch (this_mode) {
-          case 4:
-          case 7: if (++freq_strobe_mode > 3) freq_strobe_mode = 0;
-            break;
-          case 6: if (++light_mode > 2) light_mode = 0;
-            break;
-        }
-        break;
-      case BUTT_OK: digitalWrite(MLED_PIN, settings_mode ^ MLED_ON); settings_mode = !settings_mode;
-        break;
-      case BUTT_UP:
-        if (settings_mode) {
-          // ВВЕРХ общие настройки
-          EMPTY_BRIGHT = smartIncr(EMPTY_BRIGHT, 5, 0, 255);
-        } else {
-          switch (this_mode) {
-            case 0:
-              break;
-            case 1: RAINBOW_STEP = smartIncrFloat(RAINBOW_STEP, 0.5, 0.5, 20);
-              break;
-            case 2:
-            case 3:
-            case 4: MAX_COEF_FREQ = smartIncrFloat(MAX_COEF_FREQ, 0.1, 0, 5);
-              break;
-            case 5: STROBE_PERIOD = smartIncr(STROBE_PERIOD, 20, 1, 1000);
-              break;
-            case 6:
-              switch (light_mode) {
-                case 0: LIGHT_SAT = smartIncr(LIGHT_SAT, 20, 0, 255);
-                  break;
-                case 1: LIGHT_SAT = smartIncr(LIGHT_SAT, 20, 0, 255);
-                  break;
-                case 2: RAINBOW_STEP_2 = smartIncrFloat(RAINBOW_STEP_2, 0.5, 0.5, 10);
-                  break;
-              }
-              break;
-            case 7: MAX_COEF_FREQ = smartIncrFloat(MAX_COEF_FREQ, 0.1, 0.0, 10);
-              break;
-            case 8: HUE_START = smartIncr(HUE_START, 10, 0, 255);
-              break;
-          }
-        }
-        break;
-      case BUTT_DOWN:
-        if (settings_mode) {
-          // ВНИЗ общие настройки
-          EMPTY_BRIGHT = smartIncr(EMPTY_BRIGHT, -5, 0, 255);
-        } else {
-          switch (this_mode) {
-            case 0:
-              break;
-            case 1: RAINBOW_STEP = smartIncrFloat(RAINBOW_STEP, -0.5, 0.5, 20);
-              break;
-            case 2:
-            case 3:
-            case 4: MAX_COEF_FREQ = smartIncrFloat(MAX_COEF_FREQ, -0.1, 0, 5);
-              break;
-            case 5: STROBE_PERIOD = smartIncr(STROBE_PERIOD, -20, 1, 1000);
-              break;
-            case 6:
-              switch (light_mode) {
-                case 0: LIGHT_SAT = smartIncr(LIGHT_SAT, -20, 0, 255);
-                  break;
-                case 1: LIGHT_SAT = smartIncr(LIGHT_SAT, -20, 0, 255);
-                  break;
-                case 2: RAINBOW_STEP_2 = smartIncrFloat(RAINBOW_STEP_2, -0.5, 0.5, 10);
-                  break;
-              }
-              break;
-            case 7: MAX_COEF_FREQ = smartIncrFloat(MAX_COEF_FREQ, -0.1, 0.0, 10);
-              break;
-            case 8: HUE_START = smartIncr(HUE_START, -10, 0, 255);
-              break;
-          }
-        }
-        break;
-      case BUTT_LEFT:
-        if (settings_mode) {
-          // ВЛЕВО общие настройки
-          BRIGHTNESS = smartIncr(BRIGHTNESS, -20, 0, 255);
-          FastLED.setBrightness(BRIGHTNESS);
-        } else {
-          switch (this_mode) {
-            case 0:
-            case 1: SMOOTH = smartIncrFloat(SMOOTH, -0.05, 0.05, 1);
-              break;
-            case 2:
-            case 3:
-            case 4: SMOOTH_FREQ = smartIncrFloat(SMOOTH_FREQ, -0.05, 0.05, 1);
-              break;
-            case 5: STROBE_SMOOTH = smartIncr(STROBE_SMOOTH, -20, 0, 255);
-              break;
-            case 6:
-              switch (light_mode) {
-                case 0: LIGHT_COLOR = smartIncr(LIGHT_COLOR, -10, 0, 255);
-                  break;
-                case 1: COLOR_SPEED = smartIncr(COLOR_SPEED, -10, 0, 255);
-                  break;
-                case 2: RAINBOW_PERIOD = smartIncr(RAINBOW_PERIOD, -1, -20, 20);
-                  break;
-              }
-              break;
-            case 7: RUNNING_SPEED = smartIncr(RUNNING_SPEED, -10, 1, 255);
-              break;
-            case 8: HUE_STEP = smartIncr(HUE_STEP, -1, 1, 255);
-              break;
-          }
-        }
-        break;
-      case BUTT_RIGHT:
-        if (settings_mode) {
-          // ВПРАВО общие настройки
-          BRIGHTNESS = smartIncr(BRIGHTNESS, 20, 0, 255);
-          FastLED.setBrightness(BRIGHTNESS);
-        } else {
-          switch (this_mode) {
-            case 0:
-            case 1: SMOOTH = smartIncrFloat(SMOOTH, 0.05, 0.05, 1);
-              break;
-            case 2:
-            case 3:
-            case 4: SMOOTH_FREQ = smartIncrFloat(SMOOTH_FREQ, 0.05, 0.05, 1);
-              break;
-            case 5: STROBE_SMOOTH = smartIncr(STROBE_SMOOTH, 20, 0, 255);
-              break;
-            case 6:
-              switch (light_mode) {
-                case 0: LIGHT_COLOR = smartIncr(LIGHT_COLOR, 10, 0, 255);
-                  break;
-                case 1: COLOR_SPEED = smartIncr(COLOR_SPEED, 10, 0, 255);
-                  break;
-                case 2: RAINBOW_PERIOD = smartIncr(RAINBOW_PERIOD, 1, -20, 20);
-                  break;
-              }
-              break;
-            case 7: RUNNING_SPEED = smartIncr(RUNNING_SPEED, 10, 1, 255);
-              break;
-            case 8: HUE_STEP = smartIncr(HUE_STEP, 1, 1, 255);
-              break;
-          }
-        }
-        break;
-      default: eeprom_flag = false;   // если не распознали кнопку, не обновляем настройки!
-        break;
-    }*/
-    
+
+    //Вывод полученных значений в Serial. Понадобится для отладки.
+    // for (int j = 0; j < 2; ++j)
+    // {
+    //   Serial.print(F("SETTING "));
+    //   Serial.print(j);
+    //   Serial.print(F(" = "));
+    //   Serial.println(settings[j]);
+    // }
     /////////////////////////////////////////////////////////////////////////////////////////////////
   }
 }
 #endif
 
+//Автоматический режим настройки шумов
 void autoLowPass() {
   // для режима VU
   delay(10);                                // ждём инициализации АЦП
@@ -1077,7 +852,7 @@ void autoLowPass() {
     EEPROM.updateInt(72, SPEKTR_LOW_PASS);
   }
 }
-
+//Хз что делает этот метод
 void analyzeAudio() {
   for (int i = 0 ; i < FHT_N ; i++) {
     int sample = analogRead(SOUND_R_FREQ);
@@ -1089,6 +864,7 @@ void analyzeAudio() {
   fht_mag_log(); // take the output of the fht
 }
 
+//Опрос кнопки если она есть
 void buttonTick() {
   butt1.tick();  // обязательная функция отработки. Должна постоянно опрашиваться
   if (butt1.isSingle())                              // если единичное нажатие
@@ -1098,6 +874,7 @@ void buttonTick() {
     fullLowPass();
   }
 }
+//Метод настройки шумов
 void fullLowPass() {
   digitalWrite(MLED_PIN, MLED_ON);   // включить светодиод
   FastLED.setBrightness(0); // погасить ленту
@@ -1109,19 +886,20 @@ void fullLowPass() {
   FastLED.setBrightness(BRIGHTNESS);  // вернуть яркость
   digitalWrite(MLED_PIN, !MLED_ON);    // выключить светодиод
 }
+//Запись всех значений в память Arduino
 void updateEEPROM() {
   EEPROM.updateByte(1, this_mode);
   EEPROM.updateByte(2, freq_strobe_mode);
   EEPROM.updateByte(3, light_mode);
   EEPROM.updateInt(4, RAINBOW_STEP);
   EEPROM.updateFloat(8, MAX_COEF_FREQ);
-  EEPROM.updateInt(12, STROBE_PERIOD);
+  EEPROM.updateInt(12, MAX_COEF_FREQ); //Можно заменить на другое значение, чтобы не сохранять два раза
   EEPROM.updateInt(16, LIGHT_SAT);
   EEPROM.updateFloat(20, RAINBOW_STEP_2);
   EEPROM.updateInt(24, HUE_START);
   EEPROM.updateFloat(28, SMOOTH);
   EEPROM.updateFloat(32, SMOOTH_FREQ);
-  EEPROM.updateInt(36, STROBE_SMOOTH);
+  EEPROM.updateInt(36, SMOOTH_FREQ); //Можно заменить на другое значение, чтобы не сохранять два раза
   EEPROM.updateInt(40, LIGHT_COLOR);
   EEPROM.updateInt(44, COLOR_SPEED);
   EEPROM.updateInt(48, RAINBOW_PERIOD);
@@ -1130,19 +908,20 @@ void updateEEPROM() {
   EEPROM.updateInt(60, EMPTY_BRIGHT);
   if (KEEP_STATE) EEPROM.updateByte(64, ONstate);
 }
+//Чтение всех параметров из памяти Arduino
 void readEEPROM() {
   this_mode = EEPROM.readByte(1);
   freq_strobe_mode = EEPROM.readByte(2);
   light_mode = EEPROM.readByte(3);
   RAINBOW_STEP = EEPROM.readInt(4);
   MAX_COEF_FREQ = EEPROM.readFloat(8);
-  STROBE_PERIOD = EEPROM.readInt(12);
+  //STROBE_PERIOD = EEPROM.readInt(12);
   LIGHT_SAT = EEPROM.readInt(16);
   RAINBOW_STEP_2 = EEPROM.readFloat(20);
   HUE_START = EEPROM.readInt(24);
   SMOOTH = EEPROM.readFloat(28);
   SMOOTH_FREQ = EEPROM.readFloat(32);
-  STROBE_SMOOTH = EEPROM.readInt(36);
+  //STROBE_SMOOTH = EEPROM.readInt(36);
   LIGHT_COLOR = EEPROM.readInt(40);
   COLOR_SPEED = EEPROM.readInt(44);
   RAINBOW_PERIOD = EEPROM.readInt(48);
@@ -1151,6 +930,7 @@ void readEEPROM() {
   EMPTY_BRIGHT = EEPROM.readInt(60);
   if (KEEP_STATE) ONstate = EEPROM.readByte(64);
 }
+//Метод проверки и записи в память по таймеру
 void eepromTick() {
   if (eeprom_flag)
     if (millis() - eeprom_timer > 30000) {  // 30 секунд после последнего нажатия с пульта
@@ -1159,6 +939,7 @@ void eepromTick() {
       updateEEPROM();
     }
 }
+//Метод для индикации приёма сигнала через blutooth.
 #if REMOTE_TYPE == 4
 void ledBlink() {
   if (LED_WORK_FL) {
