@@ -196,27 +196,6 @@ byte settings[2]; //Массив настроек
 #define BUTT_HASH   0x38379AD   // #
 #endif
 
-// ----- КНОПКИ СВОЕГО ПУЛЬТА -----
-#if REMOTE_TYPE == 4
-#define BUTT_UP     0x42
-#define BUTT_DOWN   0x41
-#define BUTT_LEFT   0x43
-#define BUTT_RIGHT  0x44
-#define BUTT_OK     0x45
-#define BUTT_1      0x31
-#define BUTT_2      0x32
-#define BUTT_3      0x33
-#define BUTT_4      0x34
-#define BUTT_5      0x35
-#define BUTT_6      0x36
-#define BUTT_7      0x37
-#define BUTT_8      0x38
-#define BUTT_9      0x39
-#define BUTT_0      0x30
-#define BUTT_STAR   0x46  // *
-#define BUTT_HASH   0x47  // #
-#endif
-
 // ------------------------------ ДЛЯ РАЗРАБОТЧИКОВ --------------------------------
 #define MODE_AMOUNT 9      // количество режимов
 
@@ -374,57 +353,22 @@ void setup() {
 }
 
 void requestParametr() {
-  settings[0] = (byte)this_mode;
-  settings[2] = smartConvertByte(BRIGHTNESS, 0, 255);
-  settings[3] = smartConvertByte(EMPTY_BRIGHT, 0, 255);
-  switch (this_mode)
-  {
-    case 0:
-      settings[4] = smartConvertByte(SMOOTH, 0.05, 1); // Умножить на 100
-      break;
-    case 1:
-      settings[4] = smartConvertByte(SMOOTH, 0.05, 1);     //чтобы число было минимум 0.05 и максимум 1
-      settings[5] = smartConvertByte(RAINBOW_STEP, 0.5, 20);   //чтобы число было минимум 0.5 и максимум 20
-      break;
-    case 2:
-    case 3:
-      settings[4] = smartConvertByte(SMOOTH_FREQ, 0.05, 1);
-      settings[5] = smartConvertByte(MAX_COEF_FREQ, 0, 5);
-      break;
-    case 4:
-        settings[1] = (byte)light_mode;
-        settings[4] = smartConvertByte(SMOOTH_FREQ, 0.05, 1);
-        settings[5] = smartConvertByte(MAX_COEF_FREQ, 0, 5);
-      break;
-    case 5:
-      break;
-    case 6:
-      settings[1] = (byte)light_mode;
-        switch (light_mode) {
-          case 0: 
-            settings[4] = smartConvertByte(LIGHT_COLOR, 0, 255);
-            settings[5] = smartConvertByte(LIGHT_SAT, 0, 255);
-            break;
-          case 1: 
-            settings[4] = smartConvertByte(LIGHT_SAT, 0, 255);
-            settings[5] = smartConvertByte(COLOR_SPEED, 0, 255);
-            break;
-          case 2: 
-            settings[4] = smartConvertByte(RAINBOW_PERIOD, -20, 20);  //????????????? Написать правильный метод конвертации
-            settings[5] = smartConvertByte(RAINBOW_STEP_2, 0.5, 10);
-            break;
-            }
-      break;
-    case 7:
-      settings[1] = (byte)freq_strobe_mode;
-      settings[4] = smartConvertByte(RUNNING_SPEED, 1, 255);
-      settings[5] = smartConvertByte(MAX_COEF_FREQ, 0.0, 10);
-      break;
-    case 8:
-      settings[4] = smartConvertByte(HUE_STEP, 1, 255);
-      settings[5] = smartConvertByte(HUE_START, 0, 255);
-      break;  
-  }
+
+  Serial.write((byte)this_mode);
+  Serial.write(smartConvertByte(BRIGHTNESS, 0, 255, false));
+  Serial.write(smartConvertByte(EMPTY_BRIGHT, 0, 255, false));
+  Serial.write(smartConvertByte(SMOOTH, 0.05, 1, true));
+  Serial.write(smartConvertByte(RAINBOW_STEP, 0.5, 20, false));
+  Serial.write(smartConvertByte(SMOOTH_FREQ, 0.05, 1, true));
+  Serial.write(smartConvertByte(MAX_COEF_FREQ, 0, 5, true));
+  Serial.write(smartConvertByte(LIGHT_COLOR, 0, 255, false));
+  Serial.write(smartConvertByte(LIGHT_SAT, 0, 255, false));
+  Serial.write(smartConvertByte(COLOR_SPEED, 0, 255, true));
+  Serial.write(smartConvertByte(RAINBOW_PERIOD, -20, 20, false)); //????????????? Написать правильный метод конвертации
+  Serial.write(smartConvertByte(RAINBOW_STEP_2, 0.5, 10, true));
+  Serial.write(smartConvertByte(RUNNING_SPEED, 1, 255, true));
+  Serial.write(smartConvertByte(HUE_STEP, 1, 255, false));
+  Serial.write(smartConvertByte(HUE_START, 0, 255, false));
 }
 
 void loop() {
@@ -789,9 +733,9 @@ float smartConvertFloat(float value, float mininmum, float maximum, boolean inve
   return val_buf;
 }
 
-byte smartConvertByte(float value, float mininmum, float maximum) {
+byte smartConvertByte(float value, float mininmum, float maximum, boolean invert) {
   float val_buf = value / (maximum/100);
-  //val_buf = constrain(val_buf, mininmum, maximum);
+  if (invert) val_buf = (val_buf - 100) * (-1);
   return (byte)val_buf;
 }
 
@@ -836,49 +780,24 @@ void remoteTick() {
     eeprom_timer = millis();
     eeprom_flag = true;
     LED_WORK_FL = true;
-    //byte settt[] = {2,5,44,77,33,55,66,77};
-    //if (settings[0] == 10)
-    //{
-    //   requestParametr();
-    //   for (int i = 0; i < 8; ++i) {
-    //   Serial.write(settings[i]);
-    //   //Serial.print(" ");
-    //   }
-    //}
-
-    //if (settings[6] == 1) //Если пришла команда выключения или включения
-    //{
-    //  ONstate = !ONstate; 
-    //  FastLED.clear(); 
-    //  FastLED.show(); 
-    //  updateEEPROM();
-    //}
-    //if (settings[7] == 1) //Если пришла команда настройки шума
-    //{
-    //   fullLowPass();
-    //}
-
-    // if (settings[0] <= 8)
-    // {
-    //  this_mode = settings[0];
-    //  FastLED.setBrightness(smartConvertFloat(settings[2], 0, 255));
-    // EMPTY_BRIGHT = smartConvertFloat(settings[3], 0, 255);
-    // }
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     switch (settings[0]) {
       case 0: break;
       case 1: 
-        if (settings[1] == 1) {
+        switch (settings[1]) {
+          case 1: //Если пришла команда выключения или включения
             ONstate = !ONstate; 
             FastLED.clear(); 
             FastLED.show(); 
             updateEEPROM();
+            break;
+          case 2: //Если пришла команда запроса параметров
+            requestParametr();
+            break;
         }
         break;
       case 2:
-        if (settings[1] == 1) {
+        if (settings[1] == 1) { //Если пришла команда настройки шума
             fullLowPass();
         }
         break;
@@ -943,59 +862,6 @@ void remoteTick() {
       default: eeprom_flag = false;   // если не распознали кнопку, не обновляем настройки!
     }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-    // switch (settings[0]) {
-    //   case 0: 
-    //     SMOOTH = smartConvertFloat(settings[4], 0.05, 1);
-    //     break;
-    //   case 1: 
-    //     SMOOTH = smartConvertFloat(settings[4], 0.05, 1);     //чтобы число было минимум 0.05 и максимум 1
-    //     RAINBOW_STEP = smartConvertFloat(settings[5], 0.5, 20);   //чтобы число было минимум 0.5 и максимум 20
-    //     break;
-    //   case 2:
-    //   case 3: 
-    //     SMOOTH_FREQ = smartConvertFloat(settings[4], 0.05, 1);
-    //     MAX_COEF_FREQ = smartConvertFloat(settings[5], 0, 5);
-    //     break;
-    //   case 4: 
-    //     light_mode = (int8_t)settings[1];
-    //     SMOOTH_FREQ = smartConvertFloat(settings[4], 0.05, 1);
-    //     MAX_COEF_FREQ = smartConvertFloat(settings[5], 0, 5);
-    //     break;
-    //   case 5: 
-    //     break;
-    //   case 6: 
-    //     light_mode = (int8_t)settings[1];
-    //     switch (settings[1]) {
-    //       case 0: 
-    //         LIGHT_COLOR = smartConvertFloat(settings[4], 0, 255);
-    //         LIGHT_SAT = smartConvertFloat(settings[5], 0, 255);
-    //         break;
-    //       case 1: 
-    //         LIGHT_SAT = smartConvertFloat(settings[4], 0, 255);
-    //         COLOR_SPEED = smartConvertFloat(settings[5], 0, 255);
-    //         break;
-    //       case 2: 
-    //         RAINBOW_PERIOD = smartConvertFloat(settings[4], -20, 20);  //????????????? Написать правильный метод конвертации
-    //         RAINBOW_STEP_2 = smartConvertFloat(settings[5], 0.5, 10);
-    //         break;
-    //           }
-    //     break;
-    //   case 7: 
-    //     freq_strobe_mode = (int8_t)settings[1];
-    //     RUNNING_SPEED = smartConvertFloat(settings[4], 1, 255);
-    //     MAX_COEF_FREQ = smartConvertFloat(settings[5], 0.0, 10);
-    //     break;
-    //   case 8: 
-    //     HUE_STEP = smartConvertFloat(settings[4], 1, 255);
-    //     HUE_START = smartConvertFloat(settings[5], 0, 255);
-    //     break;
-    //   default: eeprom_flag = false;   // если не распознали кнопку, не обновляем настройки!
-    //     break;
-    // }
-    // Нужны кнопки настройки шумов и включения и отключения
     ir_flag = false;
     for (int j = 0; j < 2; ++j)
     {
